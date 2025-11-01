@@ -16,9 +16,6 @@ import notificationRoutes from "./routes/notification.routes";
 
 dotenv.config();
 
-// 한국 시간대 설정
-process.env.TZ = "Asia/Seoul";
-
 const app = express();
 const server = http.createServer(app);
 
