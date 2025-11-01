@@ -1,6 +1,8 @@
 import cron from 'node-cron';
 import pool from '../config/database';
 
+let dbConnectionErrorLogged = false;
+
 export function startNotificationScheduler() {
   // 매 1분마다 실행
   cron.schedule('* * * * *', async () => {
@@ -50,6 +52,15 @@ export function startNotificationScheduler() {
         }
       }
     } catch (error: any) {
+      // 데이터베이스 연결 오류는 처음 한 번만 로그 출력
+      if (error.message?.includes('Access denied') || error.message?.includes('ECONNREFUSED')) {
+        if (!dbConnectionErrorLogged) {
+          console.error('Notification scheduler: Database connection failed. Please check your .env file and database credentials.');
+          console.error('Error:', error.message);
+          dbConnectionErrorLogged = true;
+        }
+        return; // 데이터베이스 연결 실패 시 스케줄러 실행 중단
+      }
       console.error('Notification scheduler error:', error.message);
     }
   });
